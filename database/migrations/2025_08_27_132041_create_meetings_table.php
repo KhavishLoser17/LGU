@@ -16,6 +16,9 @@ return new class extends Migration
             $table->string('title')->index(); // Add index for faster queries
             $table->enum('status', ['pending', 'approved', 'rejected', 'completed'])->default('pending')->index();
             $table->text('description')->nullable();
+            $table->date('meeting_date')->nullable()->index(); // Add this
+            $table->time('start_time')->nullable(); // Add this
+            $table->time('end_time')->nullable(); // Add this
             $table->string('image_path')->nullable();
             $table->json('documents')->nullable(); // Use JSON column type
             $table->string('district_selection')->nullable()->index();

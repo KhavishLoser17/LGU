@@ -3,6 +3,8 @@
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AgendaController;
 use App\Http\Controllers\ManageController;
+use App\Http\Controllers\PublishController;
+use App\Http\Controllers\RecordingController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -38,4 +40,16 @@ Route::prefix('attendance')->group(function () {
     Route::delete('/{meeting}', [ManageController::class, 'destroy'])->name('destroy');
     Route::patch('/{meeting}/status', [ManageController::class, 'updateStatus'])->name('updateStatus');
     Route::get('/{meeting}/download/{documentIndex}', [ManageController::class, 'downloadDocument'])->name('downloadDocument');
+
+
+    Route::get('/status', [PublishController::class, 'status'])->name('minutes.status');
+    Route::post('/{meeting}/publish', [PublishController::class, 'publish'])->name('meetings.publish');
+    Route::post('/{meeting}/unpublish', [PublishController::class, 'unpublish'])->name('meetings.unpublish');
+    Route::get('/{id}/print', [PublishController::class, 'printMeeting'])->name('meetings.print');
+    Route::get('/', [PublishController::class, 'landingPage'])->name('landing.page');
+    
+
+    Route::get('/record/test', [RecordingController::class, 'record'])->name('recording.record');
+    Route::get('/recording', [RecordingController::class, 'index'])->name('recording.index');
+    Route::post('/recording/start/{meeting}', [RecordingController::class, 'startRecording'])->name('recording.start');
 // });

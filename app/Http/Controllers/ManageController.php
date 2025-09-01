@@ -16,9 +16,64 @@ use Illuminate\Support\Facades\DB;
 
 class ManageController extends Controller
 {
-    public function manage(){
-        return view('minutes.manage');
+   public function manage()
+    {
+        $meetings = Meeting::select([
+            'id', 'title', 'description', 'district_selection', 
+            'status', 'image_path', 'created_at', 'meeting_date'
+        ])
+        ->orderBy('created_at', 'desc')
+        ->get()
+        ->map(function ($meeting) {
+            return [
+                'id' => $meeting->id,
+                'title' => $meeting->title,
+                'description' => $meeting->description,
+                'district' => $meeting->district_selection,
+                'status' => $meeting->status,
+                'status_color' => $this->getStatusColor($meeting->status),
+                'image_url' => $meeting->getImageUrlAttribute(),
+                'created_date' => $meeting->created_at->format('M d, Y'),
+                'meeting_date' => $meeting->meeting_date ? $meeting->meeting_date->format('M d, Y') : null,
+                'has_documents' => $meeting->hasDocuments()
+            ];
+        });
+
+        return view('minutes.manage', compact('meetings'));
     }
+    private function getStatusColor($status)
+    {
+        return match($status) {
+            'approved' => ['bg' => 'bg-green-100', 'text' => 'text-green-800'],
+            'rejected' => ['bg' => 'bg-red-100', 'text' => 'text-red-800'],
+            'pending' => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-800'],
+            default => ['bg' => 'bg-gray-100', 'text' => 'text-gray-800']
+        };
+    }
+    public function approve($id)
+    {
+        $meeting = Meeting::findOrFail($id);
+        $meeting->update(['status' => 'approved']);
+        
+        return response()->json(['success' => true, 'message' => 'Meeting approved successfully']);
+    }
+
+    public function reject($id)
+    {
+        $meeting = Meeting::findOrFail($id);
+        $meeting->update(['status' => 'rejected']);
+        
+        return response()->json(['success' => true, 'message' => 'Meeting rejected successfully']);
+    }
+
+    public function destroy($id)
+    {
+        $meeting = Meeting::findOrFail($id);
+        $meeting->delete();
+        
+        return response()->json(['success' => true, 'message' => 'Meeting deleted successfully']);
+    }
+
 
   public function store(Request $request)
 {
@@ -26,6 +81,9 @@ class ManageController extends Controller
     $validated = $request->validate([
         'title' => 'required|string|max:255',
         'description' => 'nullable|string',
+        'meeting_date' => 'required|date', // Add this
+        'start_time' => 'required|date_format:H:i', // Add this
+        'end_time' => 'nullable|date_format:H:i|after:start_time', // Add this
         'image' => 'nullable|image|max:5120',
         'documents.*' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
         'district_selection' => 'nullable|string',
@@ -42,6 +100,9 @@ class ManageController extends Controller
         $meetingData = [
             'title' => $validated['title'],
             'status' => 'pending',
+            'meeting_date' => $validated['meeting_date'], // Add this
+            'start_time' => $validated['start_time'], // Add this
+            'end_time' => $validated['end_time'] ?? null, // Add this
             'description' => $validated['description'] ?? null,
             'district_selection' => $validated['district_selection'] ?? null,
             'agenda_leader' => $validated['agenda_leader'] ?? null,
@@ -91,7 +152,7 @@ class ManageController extends Controller
     } catch (\Exception $e) {
         DB::rollBack();
 
-        \Log::error('Meeting creation failed: ' . $e->getMessage());
+        Log::error('Meeting creation failed: ' . $e->getMessage());
 
         return response()->json([
             'success' => false,
@@ -100,10 +161,7 @@ class ManageController extends Controller
         ], 500);
     }
 }
-    public function edit(Meeting $meeting)
-    {
-        return view('minutes.manage', compact('meeting'));
-    }
+
 
     public function update(Request $request, Meeting $meeting)
     {
@@ -184,90 +242,4 @@ class ManageController extends Controller
         }
     }
 
-    public function destroy(Meeting $meeting)
-    {
-        try {
-            // Delete associated files
-            if ($meeting->image_path && Storage::disk('public')->exists($meeting->image_path)) {
-                Storage::disk('public')->delete($meeting->image_path);
-            }
-
-            if ($meeting->documents) {
-                foreach ($meeting->documents as $document) {
-                    if (Storage::disk('public')->exists($document['path'])) {
-                        Storage::disk('public')->delete($document['path']);
-                    }
-                }
-            }
-
-            $meeting->delete();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Meeting deleted successfully.'
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error deleting meeting: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    public function updateStatus(Request $request, Meeting $meeting)
-    {
-        try {
-            $request->validate([
-                'status' => 'required|in:pending,approved,rejected,completed'
-            ]);
-
-            $meeting->update(['status' => $request->status]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Meeting status updated successfully.'
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error updating status: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    public function downloadDocument(Meeting $meeting, $documentIndex)
-    {
-        try {
-            if (!isset($meeting->documents[$documentIndex])) {
-                abort(404, 'Document not found');
-            }
-
-            $document = $meeting->documents[$documentIndex];
-            $filePath = storage_path('app/public/' . $document['path']);
-
-            if (!file_exists($filePath)) {
-                abort(404, 'File not found');
-            }
-
-            return response()->download($filePath, $document['name']);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error downloading document: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    public function index()
-    {
-        try {
-            $meetings = Meeting::latest()->get();
-            return view('meetings.index', compact('meetings'));
-        } catch (\Exception $e) {
-            return back()->with('error', 'Error loading meetings: ' . $e->getMessage());
-        }
-    }
 }

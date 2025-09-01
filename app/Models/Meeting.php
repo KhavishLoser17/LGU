@@ -7,11 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class Meeting extends Model
 {
     protected $fillable = [
-        'title', 'status', 'description', 'image_path', 'documents',
-        'district_selection', 'agenda_leader', 'default_agenda_items','custom_agenda_items', 'closing_remarks'
+        'title', 'status', 'description', 'meeting_date', 'start_time', 'end_time', // Add these
+        'image_path', 'documents', 'district_selection', 'agenda_leader', 
+        'default_agenda_items', 'custom_agenda_items', 'closing_remarks'
     ];
 
     protected $casts = [
+        'meeting_date' => 'date', // Add this
         'default_agenda_items' => 'array',
         'custom_agenda_items' => 'array',
         'closing_remarks' => 'array',
@@ -49,5 +51,19 @@ class Meeting extends Model
         }
 
         return $items;
+    }
+    public static function getPublished()
+    {
+        $publishedIds = session()->get('published_meetings', []);
+        
+        if (empty($publishedIds)) {
+            return collect([]);
+        }
+        
+        return self::approved()
+            ->whereIn('id', $publishedIds)
+            ->select(['id', 'title', 'description', 'meeting_date', 'start_time', 'end_time', 'image_path', 'district_selection', 'agenda_leader'])
+            ->orderBy('meeting_date', 'asc')
+            ->get();
     }
 }

@@ -51,13 +51,7 @@
                 </a>
             </li>
             <li>
-                <a href=""
-                   class="block py-2 px-2 rounded text-white hover:bg-grey-100 hover:bg-opacity-20 transition-colors {{ request()->routeIs('ordinance.sponsorship-management') ? 'bg-white text-blue-900 font-bold' : '' }}">
-                    Sponsorship & Author Management
-                </a>
-            </li>
-            <li>
-                <a href=""
+                <a href="{{route('minutes.status')}}"
                    class="block py-2 px-2 rounded text-white hover:bg-grey-100 hover:bg-opacity-20 transition-colors {{ request()->routeIs('ordinance.status-tracking') ? 'bg-white text-blue-900 font-bold' : '' }}">
                     Status Tracking
                 </a>
@@ -69,28 +63,22 @@
         <div class="nav-group mb-2 bg-grey-100 bg-opacity-5 rounded-lg overflow-hidden">
             <button class="nav-group-toggle w-full text-left p-3 flex items-center gap-3 font-semibold hover:bg-grey-100 hover:bg-opacity-10 transition-colors">
                 <span class="w-5 flex justify-center">
-                    <i class="fa-solid fa-handshake-angle"></i>
+                 <i class="fa-solid fa-handshake-angle"></i>
                 </span>
                 Attendance & Monitoring
                 <i class="fa-solid fa-chevron-down caret ml-auto transition-transform duration-200"></i>
             </button>
             <ul class="nav-sublist pl-8 pb-2 max-h-0 overflow-hidden transition-all duration-300">
                 <li>
-                    <a href=""
-                    class="block py-2 px-2 rounded text-white hover:bg-grey-100 hover:bg-opacity-20 transition-colors {{ request()->routeIs('session.scheduling') ? 'bg-white text-blue-900 font-bold' : '' }}">
-                        Session Scheduling
-                    </a>
-                </li>
-                <li>
-                    <a href=""
-                    class="block py-2 px-2 rounded text-white hover:bg-grey-100 hover:bg-opacity-20 transition-colors {{ request()->routeIs('session.rollcall') ? 'bg-white text-blue-900 font-bold' : '' }}">
-                        Roll Call Management
-                    </a>
-                </li>
-                <li>
-                    <a href=""
+                    <a href="{{route('attendance.index')}}"
                     class="block py-2 px-2 rounded text-white hover:bg-grey-100 hover:bg-opacity-20 transition-colors {{ request()->routeIs('session.attendance') ? 'bg-white text-blue-900 font-bold' : '' }}">
                         Attendance Monitoring
+                    </a>
+                </li>
+                <li>
+                    <a href="{{route('attendance.records')}}"
+                    class="block py-2 px-2 rounded text-white hover:bg-grey-100 hover:bg-opacity-20 transition-colors {{ request()->routeIs('session.rollcall') ? 'bg-white text-blue-900 font-bold' : '' }}">
+                        Roll Call Management
                     </a>
                 </li>
                 <li>

@@ -26,9 +26,6 @@
             <button id="manage-tab" class="py-2 px-1 border-b-2 border-blue-500 text-blue-600 font-medium tab-btn">
                 Manage Agendas
             </button>
-            <button id="approved-tab" class="py-2 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 tab-btn">
-                Approved Agendas
-            </button>
         </nav>
     </div>
 
@@ -67,6 +64,20 @@
                                 <div class="md:col-span-2">
                                     <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
                                     <textarea id="description" name="description" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
+                                </div>
+                                <div>
+                                    <label for="meeting_date" class="block text-sm font-medium text-gray-700 mb-1">Meeting Date *</label>
+                                    <input type="date" id="meeting_date" name="meeting_date" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+
+                                <div>
+                                    <label for="start_time" class="block text-sm font-medium text-gray-700 mb-1">Start Time *</label>
+                                    <input type="time" id="start_time" name="start_time" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+
+                                <div>
+                                    <label for="end_time" class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+                                    <input type="time" id="end_time" name="end_time" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
                                 </div>
 
                                 <div>
@@ -190,177 +201,118 @@
 
 
     <!-- Manage Agendas -->
-    <div id="manage-content" class="tab-content">
-        <div class="bg-white rounded-lg shadow-sm border">
-            <div class="p-6 border-b">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-xl font-bold text-gray-900">Manage Agendas</h2>
-                    <div class="flex space-x-2">
-                        <select class="px-3 py-2 border border-gray-300 rounded-md text-sm">
-                            <option>All Status</option>
-                            <option>Pending</option>
-                            <option>Approved</option>
-                            <option>Rejected</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">District</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <img class="h-10 w-10 rounded object-cover mr-3" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23e5e7eb'/%3E%3Ctext x='20' y='20' text-anchor='middle' dy='0.35em' fill='%236b7280'%3E📋%3C/text%3E%3C/svg%3E" alt="">
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900">Monthly District Meeting</div>
-                                        <div class="text-sm text-gray-500">January 2025 Session</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">District 1</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                    Pending
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Jan 15, 2025</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <button class="text-indigo-600 hover:text-indigo-900 mr-3">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="text-green-600 hover:text-green-900 mr-3">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                                <button class="text-red-600 hover:text-red-900">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <img class="h-10 w-10 rounded object-cover mr-3" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23e5e7eb'/%3E%3Ctext x='20' y='20' text-anchor='middle' dy='0.35em' fill='%236b7280'%3E📋%3C/text%3E%3C/svg%3E" alt="">
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900">Quarterly Review Session</div>
-                                        <div class="text-sm text-gray-500">Q4 2024 Review</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">All Districts</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-                                    Rejected
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Jan 12, 2025</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <button class="text-indigo-600 hover:text-indigo-900 mr-3">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="text-green-600 hover:text-green-900 mr-3">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                                <button class="text-red-600 hover:text-red-900">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <img class="h-10 w-10 rounded object-cover mr-3" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23e5e7eb'/%3E%3Ctext x='20' y='20' text-anchor='middle' dy='0.35em' fill='%236b7280'%3E📋%3C/text%3E%3C/svg%3E" alt="">
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900">Annual Budget Planning</div>
-                                        <div class="text-sm text-gray-500">Fiscal Year 2025</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">District 3</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                    Approved
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Jan 10, 2025</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <button class="text-indigo-600 hover:text-indigo-900 mr-3">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="text-green-600 hover:text-green-900 mr-3">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                                <button class="text-red-600 hover:text-red-900">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+      <div class="mb-6 flex flex-wrap gap-4">
+        <select id="status-filter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <option value="">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+        </select>
+        <select id="district-filter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <option value="">All Districts</option>
+            <option value="District 1">District 1</option>
+            <option value="District 2">District 2</option>
+            <option value="District 3">District 3</option>
+            <option value="All Districts">All Districts</option>
+        </select>
     </div>
 
-    <!-- Approved Agendas -->
-    <div id="approved-content" class="tab-content hidden">
-        <div class="bg-white rounded-lg shadow-sm border">
-            <div class="p-6 border-b">
-                <h2 class="text-xl font-bold text-gray-900">Approved Agendas - Ready for Landing Page</h2>
-            </div>
+    <!-- Meeting Cards Grid -->
+    @if($meetings->count() > 0)
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="meetings-grid">
+            @foreach($meetings as $meeting)
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-shadow duration-300" 
+                     data-status="{{ $meeting['status'] }}" 
+                     data-district="{{ $meeting['district'] }}">
+                    <div class="p-6">
+                        <!-- Header with Image and Status -->
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                                    @if($meeting['image_url'])
+                                        <img src="{{ $meeting['image_url'] }}" alt="Meeting" class="w-full h-full object-cover rounded-lg">
+                                    @else
+                                        <i class="fas fa-clipboard-list text-white text-lg"></i>
+                                    @endif
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-900 text-lg">{{ $meeting['title'] }}</h3>
+                                    @if($meeting['description'])
+                                        <p class="text-sm text-gray-500">{{ Str::limit($meeting['description'], 50) }}</p>
+                                    @endif
+                                </div>
+                            </div>
+                            <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full {{ $meeting['status_color']['bg'] }} {{ $meeting['status_color']['text'] }}">
+                                {{ ucfirst($meeting['status']) }}
+                            </span>
+                        </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-                <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                    <img class="w-full h-32 object-cover rounded mb-3" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='150' viewBox='0 0 300 150'%3E%3Crect width='300' height='150' fill='%23e5e7eb'/%3E%3Ctext x='150' y='75' text-anchor='middle' dy='0.35em' fill='%236b7280'%3EMeeting Image%3C/text%3E%3C/svg%3E" alt="Meeting">
-                    <h3 class="font-semibold text-gray-900 mb-2">District Leadership Summit</h3>
-                    <p class="text-sm text-gray-600 mb-3">Annual leadership development session for all district coordinators...</p>
-                    <div class="flex items-center justify-between">
-                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                            Approved
-                        </span>
-                        <div class="flex space-x-2">
-                            <button class="text-blue-600 hover:text-blue-800 text-sm">
-                                <i class="fas fa-print mr-1"></i>Print
-                            </button>
-                            <button class="text-green-600 hover:text-green-800 text-sm">
-                                <i class="fas fa-globe mr-1"></i>Publish
-                            </button>
+                        <!-- Details -->
+                        <div class="space-y-3 mb-6">
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="fas fa-map-marker-alt w-4 mr-3"></i>
+                                <span>{{ $meeting['district'] }}</span>
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="fas fa-calendar w-4 mr-3"></i>
+                                <span>Created: {{ $meeting['created_date'] }}</span>
+                            </div>
+                            @if($meeting['meeting_date'])
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-clock w-4 mr-3"></i>
+                                    <span>Meeting: {{ $meeting['meeting_date'] }}</span>
+                                </div>
+                            @endif
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="fas fa-file-alt w-4 mr-3"></i>
+                                <span>{{ $meeting['has_documents'] ? 'Has documents' : 'No documents' }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                            <a href="" 
+                               class="flex items-center px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors">
+                                <i class="fas fa-edit mr-2"></i>
+                                Edit
+                            </a>
+                            <div class="flex space-x-2">
+                                <button onclick="approveMeeting({{ $meeting['id'] }})" 
+                                        class="p-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-lg transition-colors" 
+                                        title="Approve" {{ $meeting['status'] === 'approved' ? 'disabled' : '' }}>
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button onclick="rejectMeeting({{ $meeting['id'] }})" 
+                                        class="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors" 
+                                        title="Reject" {{ $meeting['status'] === 'rejected' ? 'disabled' : '' }}>
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <button onclick="deleteMeeting({{ $meeting['id'] }})" 
+                                        class="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors" 
+                                        title="Delete">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                    <img class="w-full h-32 object-cover rounded mb-3" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='150' viewBox='0 0 300 150'%3E%3Crect width='300' height='150' fill='%23e5e7eb'/%3E%3Ctext x='150' y='75' text-anchor='middle' dy='0.35em' fill='%236b7280'%3EMeeting Image%3C/text%3E%3C/svg%3E" alt="Meeting">
-                    <h3 class="font-semibold text-gray-900 mb-2">Budget Planning Session</h3>
-                    <p class="text-sm text-gray-600 mb-3">Comprehensive budget review and planning for the upcoming fiscal year...</p>
-                    <div class="flex items-center justify-between">
-                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                            Approved
-                        </span>
-                        <div class="flex space-x-2">
-                            <button class="text-blue-600 hover:text-blue-800 text-sm">
-                                <i class="fas fa-print mr-1"></i>Print
-                            </button>
-                            <button class="text-green-600 hover:text-green-800 text-sm">
-                                <i class="fas fa-globe mr-1"></i>Publish
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            @endforeach
         </div>
-    </div>
+    @else
+        <!-- Empty State -->
+        <div class="text-center py-12">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-clipboard-list text-gray-400 text-xl"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No meetings found</h3>
+            <p class="text-gray-500">Create your first meeting to get started.</p>
+            <a href="{{ route('meetings.create') }}" 
+               class="mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                Create Meeting
+            </a>
+        </div>
+    @endif
 </div>
-
  <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Cache DOM elements with null checks
@@ -705,4 +657,107 @@
             }
         });
     </script>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Filtering functionality
+    const statusFilter = document.getElementById('status-filter');
+    const districtFilter = document.getElementById('district-filter');
+    const meetingCards = document.querySelectorAll('#meetings-grid > div');
+
+    function filterMeetings() {
+        const statusValue = statusFilter.value.toLowerCase();
+        const districtValue = districtFilter.value;
+
+        meetingCards.forEach(card => {
+            const cardStatus = card.dataset.status;
+            const cardDistrict = card.dataset.district;
+
+            const statusMatch = !statusValue || cardStatus === statusValue;
+            const districtMatch = !districtValue || cardDistrict === districtValue;
+
+            if (statusMatch && districtMatch) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    statusFilter.addEventListener('change', filterMeetings);
+    districtFilter.addEventListener('change', filterMeetings);
+});
+
+// Meeting action functions
+function approveMeeting(meetingId) {
+    if (confirm('Are you sure you want to approve this meeting?')) {
+        fetch(`/meetings/${meetingId}/approve`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error approving meeting');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error approving meeting');
+        });
+    }
+}
+
+function rejectMeeting(meetingId) {
+    if (confirm('Are you sure you want to reject this meeting?')) {
+        fetch(`/meetings/${meetingId}/reject`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error rejecting meeting');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error rejecting meeting');
+        });
+    }
+}
+
+function deleteMeeting(meetingId) {
+    if (confirm('Are you sure you want to delete this meeting? This action cannot be undone.')) {
+        fetch(`/meetings/${meetingId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error deleting meeting');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting meeting');
+        });
+    }
+}
+</script>
 @endsection
