@@ -12,8 +12,6 @@ class AttendanceController extends Controller
 {
     public function __construct()
     {
-        // Set timezone to Philippines
-        Carbon::setLocale('en');
         date_default_timezone_set('Asia/Manila');
     }
 
@@ -23,32 +21,21 @@ class AttendanceController extends Controller
     public function index()
     {
         try {
-            // Use Philippine timezone
             $today = Carbon::now('Asia/Manila')->format('Y-m-d');
-
-            // Use DB query with connection management
-            $attendances = DB::table('attendances')
-                ->where('attendance_date', $today)
+            $attendances = Attendance::where('attendance_date', $today)
                 ->orderBy('check_in_time')
                 ->get();
 
             $stats = $this->calculateStats($today);
 
             return view('attendance.index', compact('attendances', 'stats', 'today'));
-
         } catch (\Exception $e) {
             Log::error('Attendance index error: ' . $e->getMessage());
-
-            // Return with empty data if database fails
             $attendances = collect([]);
             $stats = ['total' => 0, 'on_time' => 0, 'late' => 0, 'early' => 0];
             $today = Carbon::now('Asia/Manila')->format('Y-m-d');
 
-            return view('attendance.index', compact('attendances', 'stats', 'today'))
-                ->with('error', 'Database connection issue. Please try again.');
-        } finally {
-            // Close any idle connections
-            DB::disconnect();
+            return view('attendance.index', compact('attendances', 'stats', 'today'));
         }
     }
 
@@ -58,11 +45,7 @@ class AttendanceController extends Controller
     public function generateQR(Request $request)
     {
         $date = $request->get('date', Carbon::now('Asia/Manila')->format('Y-m-d'));
-
-        // Create URL for attendance scanning
         $attendanceUrl = route('attendance.scan', ['date' => $date]);
-
-       
         $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' . urlencode($attendanceUrl);
 
         return view('attendance.qr-generator', compact('qrCodeUrl', 'date', 'attendanceUrl'));
@@ -80,58 +63,82 @@ class AttendanceController extends Controller
     }
 
     /**
-     * Process attendance scan
+     * Process attendance scan - SIMPLIFIED
      */
     public function processScan(Request $request)
     {
         try {
+            // Validate the request
             $request->validate([
-                'employee_name' => 'required|string|max:255',
-                'employee_id' => 'required|string|max:50',
-                'attendance_date' => 'required|date'
+                'employee_name' => 'required|string|max:255|min:2',
+                'employee_id' => 'required|string|max:255|min:1',
+                'department' => 'nullable|string|max:255',
+                'attendance_date' => 'required|date',
+                'selfie_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+                'notes' => 'nullable|string|max:1000'
             ]);
 
+            $employeeId = strtolower(trim($request->employee_id));
             $attendanceDate = $request->attendance_date;
-            $employeeId = $request->employee_id;
 
-            // Use Philippine timezone for current time
-            $currentTime = Carbon::now('Asia/Manila')->format('H:i:s');
-
-            // Check if already marked attendance for today using direct DB query
-            $existingAttendance = DB::table('attendances')
-                ->where('employee_id', $employeeId)
+            // Check if attendance already exists
+            $existingAttendance = Attendance::where('employee_id', $employeeId)
                 ->where('attendance_date', $attendanceDate)
                 ->first();
 
             if ($existingAttendance) {
-                return redirect()->back()->with('error', 'Attendance already marked for today!');
+                return back()->with('error', 'Attendance already recorded for today!')->withInput();
             }
 
-            // Determine status based on Philippine time
-            $status = $this->determineStatus($currentTime);
+            // Get current time
+            $currentTime = Carbon::now('Asia/Manila');
+            $checkInTime = $currentTime->format('H:i:s');
 
-            // Create attendance record using DB query
-            DB::table('attendances')->insert([
-                'employee_name' => $request->employee_name,
-                'employee_id' => $employeeId,
-                'attendance_date' => $attendanceDate,
-                'check_in_time' => $currentTime,
-                'expected_time' => '08:00:00',
-                'status' => $status,
-                'notes' => $request->notes,
-                'created_at' => Carbon::now('Asia/Manila'),
-                'updated_at' => Carbon::now('Asia/Manila')
-            ]);
+            // Create attendance record
+            $attendance = new Attendance();
+            $attendance->employee_name = ucwords(strtolower($request->employee_name));
+            $attendance->employee_id = $employeeId;
+            $attendance->department = $request->department;
+            $attendance->attendance_date = $attendanceDate;
+            $attendance->check_in_time = $checkInTime;
+            $attendance->expected_time = '08:00:00';
+            $attendance->status = $this->determineStatus($checkInTime);
+            $attendance->notes = $request->notes;
 
-            $message = "Attendance marked successfully at " . Carbon::now('Asia/Manila')->format('h:i:s A') . "! Status: " . ucfirst(str_replace('_', ' ', $status));
+            // Handle file upload if present
+            if ($request->hasFile('selfie_image') && $request->file('selfie_image')->isValid()) {
+                try {
+                    $file = $request->file('selfie_image');
+                    $filename = 'selfie_' . $employeeId . '_' . $attendanceDate . '_' . time() . '.' . $file->getClientOriginalExtension();
+                    $path = $file->storeAs('selfies', $filename, 'public');
+                    $attendance->selfie_path = $path;
+                } catch (\Exception $e) {
+                    Log::error('File upload error: ' . $e->getMessage());
+                    // Continue without selfie
+                }
+            }
 
-            return redirect()->back()->with('success', $message);
+            // Save attendance
+            $attendance->save();
 
+            // Success message
+            $statusMessages = [
+                'on_time' => '✅ You are on time!',
+                'late' => '⚠️ You are late.',
+                'early' => '🕐 You are early.'
+            ];
+
+            $message = "Attendance recorded successfully! " . 
+                      ($statusMessages[$attendance->status] ?? '') . 
+                      " Check-in time: " . $currentTime->format('h:i:s A');
+
+            return back()->with('success', $message);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
-            Log::error('Process scan error: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Error processing attendance. Please try again.');
-        } finally {
-            DB::disconnect();
+            Log::error('Attendance error: ' . $e->getMessage() . ' | Data: ' . json_encode($request->all()));
+            return back()->with('error', 'Failed to record attendance. Please try again.')->withInput();
         }
     }
 
@@ -142,123 +149,44 @@ class AttendanceController extends Controller
     {
         try {
             $date = $request->get('date', Carbon::now('Asia/Manila')->format('Y-m-d'));
-
-            // Use direct DB query to avoid connection issues
-            $attendances = DB::table('attendances')
-                ->where('attendance_date', $date)
+            $attendances = Attendance::where('attendance_date', $date)
                 ->orderBy('check_in_time')
-                ->get()
-                ->map(function ($attendance) {
-                    // Convert time to Philippine timezone for display
-                    $attendance->check_in_time_formatted = Carbon::createFromFormat('H:i:s', $attendance->check_in_time)
-                        ->setTimezone('Asia/Manila')
-                        ->format('h:i:s A');
-                    return $attendance;
-                });
+                ->get();
 
             $stats = $this->calculateStats($date);
 
             return view('attendance.records', compact('attendances', 'stats', 'date'));
-
         } catch (\Exception $e) {
             Log::error('Records error: ' . $e->getMessage());
-
             $attendances = collect([]);
             $stats = ['total' => 0, 'on_time' => 0, 'late' => 0, 'early' => 0];
             $date = $request->get('date', Carbon::now('Asia/Manila')->format('Y-m-d'));
 
-            return view('attendance.records', compact('attendances', 'stats', 'date'))
-                ->with('error', 'Unable to load records. Please try again.');
-        } finally {
-            DB::disconnect();
+            return view('attendance.records', compact('attendances', 'stats', 'date'));
         }
     }
 
     /**
-     * API endpoint for QR scanner
+     * Determine attendance status
      */
-    public function apiScan(Request $request)
+    private function determineStatus($checkInTime, $expectedTime = '08:00:00')
     {
         try {
-            $request->validate([
-                'employee_name' => 'required|string|max:255',
-                'employee_id' => 'required|string|max:50',
-                'attendance_date' => 'required|date'
-            ]);
+            $checkIn = Carbon::createFromFormat('H:i:s', $checkInTime);
+            $expected = Carbon::createFromFormat('H:i:s', $expectedTime);
 
-            $attendanceDate = $request->attendance_date;
-            $employeeId = $request->employee_id;
-            $currentTime = Carbon::now('Asia/Manila')->format('H:i:s');
+            $lateThreshold = $expected->copy()->addMinutes(15); // 8:15 AM
+            $earlyThreshold = $expected->copy()->subMinutes(30); // 7:30 AM
 
-            // Check if already marked using direct query
-            $existingAttendance = DB::table('attendances')
-                ->where('employee_id', $employeeId)
-                ->where('attendance_date', $attendanceDate)
-                ->first();
-
-            if ($existingAttendance) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Attendance already marked for today!'
-                ], 400);
+            if ($checkIn->greaterThan($lateThreshold)) {
+                return 'late';
+            } elseif ($checkIn->lessThan($earlyThreshold)) {
+                return 'early';
+            } else {
+                return 'on_time';
             }
-
-            // Determine status
-            $status = $this->determineStatus($currentTime);
-
-            // Create record
-            $newAttendanceId = DB::table('attendances')->insertGetId([
-                'employee_name' => $request->employee_name,
-                'employee_id' => $employeeId,
-                'attendance_date' => $attendanceDate,
-                'check_in_time' => $currentTime,
-                'expected_time' => '08:00:00',
-                'status' => $status,
-                'notes' => $request->notes,
-                'created_at' => Carbon::now('Asia/Manila'),
-                'updated_at' => Carbon::now('Asia/Manila')
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Attendance marked successfully!',
-                'status' => $status,
-                'time' => $currentTime,
-                'time_formatted' => Carbon::createFromFormat('H:i:s', $currentTime)->format('h:i:s A'),
-                'timezone' => 'Asia/Manila',
-                'id' => $newAttendanceId
-            ]);
-
         } catch (\Exception $e) {
-            Log::error('API scan error: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Error processing attendance: ' . $e->getMessage()
-            ], 500);
-        } finally {
-            DB::disconnect();
-        }
-    }
-
-    /**
-     * Determine attendance status based on time
-     */
-    private function determineStatus($checkInTime)
-    {
-        $checkIn = Carbon::createFromFormat('H:i:s', $checkInTime, 'Asia/Manila');
-        $expected = Carbon::createFromFormat('H:i:s', '08:00:00', 'Asia/Manila');
-
-        // Late threshold: 15 minutes after expected time
-        $lateThreshold = $expected->copy()->addMinutes(15);
-
-        // Early threshold: 30 minutes before expected time
-        $earlyThreshold = $expected->copy()->subMinutes(30);
-
-        if ($checkIn->greaterThan($lateThreshold)) {
-            return 'late';
-        } elseif ($checkIn->lessThan($earlyThreshold)) {
-            return 'early';
-        } else {
+            Log::error('Status determination error: ' . $e->getMessage());
             return 'on_time';
         }
     }
@@ -269,43 +197,17 @@ class AttendanceController extends Controller
     private function calculateStats($date)
     {
         try {
-            $total = DB::table('attendances')->where('attendance_date', $date)->count();
-            $onTime = DB::table('attendances')->where('attendance_date', $date)->where('status', 'on_time')->count();
-            $late = DB::table('attendances')->where('attendance_date', $date)->where('status', 'late')->count();
-            $early = DB::table('attendances')->where('attendance_date', $date)->where('status', 'early')->count();
-
+            $attendances = Attendance::where('attendance_date', $date)->get();
+            
             return [
-                'total' => $total,
-                'on_time' => $onTime,
-                'late' => $late,
-                'early' => $early
+                'total' => $attendances->count(),
+                'on_time' => $attendances->where('status', 'on_time')->count(),
+                'late' => $attendances->where('status', 'late')->count(),
+                'early' => $attendances->where('status', 'early')->count()
             ];
         } catch (\Exception $e) {
-            Log::error('Calculate stats error: ' . $e->getMessage());
+            Log::error('Stats calculation error: ' . $e->getMessage());
             return ['total' => 0, 'on_time' => 0, 'late' => 0, 'early' => 0];
-        }
-    }
-
-    /**
-     * Health check endpoint
-     */
-    public function healthCheck()
-    {
-        try {
-            DB::table('attendances')->limit(1)->get();
-            return response()->json([
-                'status' => 'healthy',
-                'timezone' => 'Asia/Manila',
-                'server_time' => Carbon::now('Asia/Manila')->format('Y-m-d H:i:s'),
-                'database' => 'connected'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'unhealthy',
-                'error' => $e->getMessage(),
-                'timezone' => 'Asia/Manila',
-                'server_time' => Carbon::now('Asia/Manila')->format('Y-m-d H:i:s')
-            ], 500);
         }
     }
 }

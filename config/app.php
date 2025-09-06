@@ -123,4 +123,8 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'http' => [
+    'verify' => env('CURL_VERIFY_SSL', true),
+    ],
+
 ];

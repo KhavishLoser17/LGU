@@ -8,7 +8,7 @@
                 <img src="{{ asset('images/default-avatar.jpg') }}" alt="User" class="w-full h-full object-cover">
             </div>
             <div class="font-bold text-white">
-                {{ auth()->user()->name ?? 'Guest' }}
+                {{ auth()->user()->first_name ?? '' }} {{ auth()->user()->last_name ?? 'Guest' }}
             </div>
         </div>
     </div>
@@ -26,8 +26,8 @@
         </button>
         <ul class="nav-sublist pl-8 pb-2 overflow-hidden transition-all duration-300" style="max-height: 200px;">
             <li>
-                <a href=""
-                   class="block py-2 px-2 rounded text-white hover:bg-grey-100 hover:bg-opacity-20 transition-colors {{ request()->routeIs('dashboard') ? 'bg-white text-blue-900 font-bold' : '' }}">
+                <a href="{{route('dashboard')}}"
+                   class="block py-2 px-2 rounded text-white hover:bg-grey-100 hover:bg-opacity-20 transition-colors {{ request()->routeIs('dashboard') ? 'text-blue-900 font-bold' : '' }}">
                     Overview
                 </a>
             </li>
@@ -81,12 +81,6 @@
                         Roll Call Management
                     </a>
                 </li>
-                <li>
-                    <a href=""
-                    class="block py-2 px-2 rounded text-white hover:bg-grey-100 hover:bg-opacity-20 transition-colors {{ request()->routeIs('session.analytics') ? 'bg-white text-blue-900 font-bold' : '' }}">
-                        Session Analytics
-                    </a>
-                </li>
             </ul>
         </div>
 
@@ -101,19 +95,19 @@
             </button>
             <ul class="nav-sublist pl-8 pb-2 max-h-0 overflow-hidden transition-all duration-300">
                 <li>
-                    <a href=""
+                    <a href="{{route('records.encoding')}}"
                     class="block py-2 px-2 rounded text-white hover:bg-grey-100 hover:bg-opacity-20 transition-colors {{ request()->routeIs('session.minutes') ? 'bg-white text-blue-900 font-bold' : '' }}">
                         Minutes Encoding
                     </a>
                 </li>
                 <li>
-                    <a href=""
+                    <a href="{{route('recording')}}"
                     class="block py-2 px-2 rounded text-white hover:bg-grey-100 hover:bg-opacity-20 transition-colors {{ request()->routeIs('records.cataloging') ? 'bg-white text-blue-900 font-bold' : '' }}">
                         Records Cataloging
                     </a>
                 </li>
                 <li>
-                    <a href=""
+                    <a href="{{route('documents')}}"
                     class="block py-2 px-2 rounded text-white hover:bg-grey-100 hover:bg-opacity-20 transition-colors {{ request()->routeIs('records.documents') ? 'bg-white text-blue-900 font-bold' : '' }}">
                         Document Archive
                     </a>

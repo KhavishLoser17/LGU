@@ -5,14 +5,20 @@ use App\Http\Controllers\AgendaController;
 use App\Http\Controllers\ManageController;
 use App\Http\Controllers\PublishController;
 use App\Http\Controllers\RecordingController;
+use App\Http\Controllers\EncodingController;
+use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
+use Dom\Document;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
+
 
 /*
 |--------------------------------------------------------------------------
 | Attendance Routes
 |--------------------------------------------------------------------------
 */
-
 Route::prefix('attendance')->group(function () {
     // Main attendance dashboard
     Route::get('/', [AttendanceController::class, 'index'])->name('attendance.index');
@@ -26,18 +32,18 @@ Route::prefix('attendance')->group(function () {
 
     // View attendance records
     Route::get('/records', [AttendanceController::class, 'records'])->name('attendance.records');
-
-    // API endpoint for mobile/ajax scanning
-    Route::post('/api/scan', [AttendanceController::class, 'apiScan'])->name('attendance.api-scan');
+   
 });
 // Route::middleware(['auth'])->group(function () {
-    Route::get('/agenda', [AgendaController::class, 'agenda'])->name('agenda.index');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/manage', [ManageController::class, 'manage'])->name('agenda.manage');
     Route::post('/manage', [ManageController::class, 'store'])->name('store');
     Route::get('/{meeting}/edit', [ManageController::class, 'edit'])->name('edit');
     Route::put('/{meeting}', [ManageController::class, 'update'])->name('update');
-    Route::delete('/{meeting}', [ManageController::class, 'destroy'])->name('destroy');
+    Route::post('/meetings/{meeting}/approve', [ManageController::class, 'approve'])->name('meetings.approve');
+    Route::post('/meetings/{meeting}/reject', [ManageController::class, 'reject'])->name('meetings.reject');
+    Route::delete('/meetings/{meeting}', [ManageController::class, 'destroy'])->name('meetings.destroy');
     Route::patch('/{meeting}/status', [ManageController::class, 'updateStatus'])->name('updateStatus');
     Route::get('/{meeting}/download/{documentIndex}', [ManageController::class, 'downloadDocument'])->name('downloadDocument');
 
@@ -49,7 +55,31 @@ Route::prefix('attendance')->group(function () {
     Route::get('/', [PublishController::class, 'landingPage'])->name('landing.page');
     
 
-    Route::get('/record/test', [RecordingController::class, 'record'])->name('recording.record');
-    Route::get('/recording', [RecordingController::class, 'index'])->name('recording.index');
-    Route::post('/recording/start/{meeting}', [RecordingController::class, 'startRecording'])->name('recording.start');
+   
+    Route::get('/recording', [RecordingController::class, 'index'])->name('recording');
+     Route::get('/search', [RecordingController::class, 'searchMeetings'])->name('search');
+    Route::get('/meeting/{id}', [RecordingController::class, 'getMeetingDetails'])->name('meeting.details');
+    
+    // Meeting control actions
+    Route::post('/meeting/{id}/start', [RecordingController::class, 'startMeeting'])->name('meeting.start');
+    Route::post('/meeting/{id}/complete', [RecordingController::class, 'completeMeeting'])->name('meeting.complete');
+    Route::post('/meeting/{id}/save-progress', [RecordingController::class, 'saveProgress'])->name('meeting.save-progress');
+
+    
+    // Reports
+    Route::get('/meeting/{id}/report', [RecordingController::class, 'generateReport'])->name('meeting.report');  
+
+    Route::get('/encoding', [EncodingController::class, 'encoding'])->name('records.encoding');
+
+
+    Route::get('/documents', [DocumentController::class, 'document'])->name('documents');
+    Route::post('/documents', [DocumentController::class, 'store'])->name('documents.store');
+    Route::delete('/documents/{id}', [DocumentController::class, 'destroy'])->name('documents.destroy');
 // });
+
+    Route::get('login', [AuthController::class, 'login'])->name('login');
+    Route::post('login', [AuthController::class, 'authenticate'])->name('authenticate');
+    Route::get('register', [AuthController::class, 'showRegistrationForm'])->name('register');
+    Route::post('register', [AuthController::class, 'register'])->name('register.submit');
+    Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+

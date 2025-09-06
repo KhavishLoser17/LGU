@@ -2,51 +2,71 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class Attendance extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'employee_name',
         'employee_id',
+        'department',
         'attendance_date',
         'check_in_time',
         'expected_time',
         'status',
+        'selfie_path',
         'notes'
     ];
 
     protected $casts = [
-        'attendance_date' => 'date',
-        'check_in_time' => 'datetime:H:i:s',
-        'expected_time' => 'datetime:H:i:s'
+        'attendance_date' => 'date'
     ];
 
     /**
-     * Determine attendance status based on check-in time
+     * Get the full URL for the selfie image
      */
-    public function determineStatus($checkInTime, $expectedTime = '08:00:00')
+    public function getSelfieUrlAttribute()
     {
-        $checkIn = Carbon::createFromFormat('H:i:s', $checkInTime);
-        $expected = Carbon::createFromFormat('H:i:s', $expectedTime);
-
-        // Late threshold: 15 minutes after expected time
-        $lateThreshold = $expected->copy()->addMinutes(15);
-
-        // Early threshold: 30 minutes before expected time
-        $earlyThreshold = $expected->copy()->subMinutes(30);
-
-        if ($checkIn->greaterThan($lateThreshold)) {
-            return 'late';
-        } elseif ($checkIn->lessThan($earlyThreshold)) {
-            return 'early';
-        } else {
-            return 'on_time';
+        if (!empty($this->selfie_path) && Storage::disk('public')->exists($this->selfie_path)) {
+            return Storage::disk('public')->url($this->selfie_path);
         }
+        return null;
+    }
+
+    /**
+     * Check if selfie exists
+     */
+    public function hasSelfie()
+    {
+        return !empty($this->selfie_path) && Storage::disk('public')->exists($this->selfie_path);
+    }
+
+    /**
+     * Get formatted check-in time
+     */
+    public function getFormattedCheckInTimeAttribute()
+    {
+        try {
+            return Carbon::createFromFormat('H:i:s', $this->check_in_time)->format('h:i:s A');
+        } catch (\Exception $e) {
+            return $this->check_in_time;
+        }
+    }
+
+    /**
+     * Get status badge color
+     */
+    public function getStatusColorAttribute()
+    {
+        $colors = [
+            'on_time' => 'green',
+            'late' => 'red',
+            'early' => 'yellow'
+        ];
+        
+        return $colors[$this->status] ?? 'gray';
     }
 
     /**
@@ -54,7 +74,7 @@ class Attendance extends Model
      */
     public static function getByDate($date)
     {
-        return self::where('attendance_date', $date)->get();
+        return self::where('attendance_date', $date)->orderBy('check_in_time')->get();
     }
 
     /**
@@ -68,11 +88,13 @@ class Attendance extends Model
             $query->where('attendance_date', $date);
         }
 
+        $records = $query->get();
+
         return [
-            'total' => $query->count(),
-            'on_time' => $query->where('status', 'on_time')->count(),
-            'late' => $query->where('status', 'late')->count(),
-            'early' => $query->where('status', 'early')->count(),
+            'total' => $records->count(),
+            'on_time' => $records->where('status', 'on_time')->count(),
+            'late' => $records->where('status', 'late')->count(),
+            'early' => $records->where('status', 'early')->count(),
         ];
     }
 }

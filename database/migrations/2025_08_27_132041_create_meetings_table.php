@@ -14,18 +14,24 @@ return new class extends Migration
        Schema::create('meetings', function (Blueprint $table) {
             $table->id();
             $table->string('title')->index(); // Add index for faster queries
-            $table->enum('status', ['pending', 'approved', 'rejected', 'completed'])->default('pending')->index();
+            $table->enum('status', ['pending', 'approved', 'rejected', 'completed', 'ongoing'])->default('pending')->index();
             $table->text('description')->nullable();
             $table->date('meeting_date')->nullable()->index(); // Add this
             $table->time('start_time')->nullable(); // Add this
-            $table->time('end_time')->nullable(); // Add this
+            $table->time('end_time')->nullable(); 
+            $table->timestamp('actual_start_time')->nullable();
+            $table->timestamp('actual_end_time')->nullable();
             $table->string('image_path')->nullable();
             $table->json('documents')->nullable(); // Use JSON column type
             $table->string('district_selection')->nullable()->index();
             $table->string('agenda_leader')->nullable();
             $table->json('default_agenda_items')->nullable(); // Use JSON column type
             $table->json('custom_agenda_items')->nullable(); // Use JSON column type
-            $table->json('closing_remarks')->nullable(); // Use JSON column type
+            $table->json('closing_remarks')->nullable();
+             $table->json('meeting_minutes')->nullable();
+            $table->json('meeting_progress')->nullable();
+            $table->timestamp('last_updated')->nullable();
+
             $table->timestamps();
 
             // Add composite indexes for common queries

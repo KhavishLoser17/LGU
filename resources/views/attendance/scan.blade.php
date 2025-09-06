@@ -19,9 +19,9 @@
 
         <!-- Success/Error Messages -->
         @if(session('success'))
-            <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
                 <div class="flex items-center">
-                    <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     <p class="text-green-800 font-medium">{{ session('success') }}</p>
@@ -30,9 +30,9 @@
         @endif
 
         @if(session('error'))
-            <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
                 <div class="flex items-center">
-                    <svg class="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                     <p class="text-red-800 font-medium">{{ session('error') }}</p>
@@ -41,63 +41,116 @@
         @endif
 
         @if($errors->any())
-            <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <div class="flex items-start">
-                    <svg class="w-5 h-5 text-red-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.268 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                    </svg>
-                    <div>
-                        @foreach($errors->all() as $error)
-                            <p class="text-red-800 text-sm">{{ $error }}</p>
-                        @endforeach
-                    </div>
-                </div>
+            <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+                <ul class="text-red-800 space-y-1">
+                    @foreach($errors->all() as $error)
+                        <li class="flex items-center">
+                            <svg class="w-4 h-4 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            {{ $error }}
+                        </li>
+                    @endforeach
+                </ul>
             </div>
         @endif
 
         <!-- Attendance Form -->
         <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-            <form action="{{ route('attendance.process-scan') }}" method="POST" class="space-y-6">
+            <form action="{{ route('attendance.process-scan') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                 @csrf
                 <input type="hidden" name="attendance_date" value="{{ $date }}">
-
+                
+                <!-- Employee Name -->
                 <div>
                     <label for="employee_name" class="block text-sm font-medium text-gray-700 mb-2">
                         Full Name <span class="text-red-500">*</span>
                     </label>
-                    <input type="text"
-                           name="employee_name"
-                           id="employee_name"
-                           value="{{ old('employee_name') }}"
+                    <input type="text" 
+                           name="employee_name" 
+                           id="employee_name" 
                            required
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           value="{{ old('employee_name') }}"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('employee_name') border-red-500 @enderror"
                            placeholder="Enter your full name">
                 </div>
 
+                <!-- Employee ID -->
                 <div>
                     <label for="employee_id" class="block text-sm font-medium text-gray-700 mb-2">
                         Employee ID <span class="text-red-500">*</span>
                     </label>
-                    <input type="text"
-                           name="employee_id"
-                           id="employee_id"
-                           value="{{ old('employee_id') }}"
+                    <input type="text" 
+                           name="employee_id" 
+                           id="employee_id" 
                            required
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           value="{{ old('employee_id') }}"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('employee_id') border-red-500 @enderror"
                            placeholder="Enter your employee ID">
                 </div>
 
+                <!-- Department (Optional) -->
+                <div>
+                    <label for="department" class="block text-sm font-medium text-gray-700 mb-2">
+                        Department 
+                    </label>
+                    <input type="text" 
+                           name="department" 
+                           id="department" 
+                           value="{{ old('department') }}"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Enter your department">
+                </div>
+
+                <!-- Selfie Upload Section -->
+                <div>
+                    <label for="selfie_image" class="block text-sm font-medium text-gray-700 mb-2">
+                        Verification Photo 
+                    </label>
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center bg-gray-50">
+                        <div class="py-4">
+                            <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <label for="selfie_image" class="cursor-pointer">
+                                <span class="inline-flex items-center px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-lg transition-colors">
+                                    📷 Take/Upload Photo (Optional)
+                                </span>
+                                <input type="file" 
+                                       name="selfie_image" 
+                                       id="selfie_image" 
+                                       accept="image/*" 
+                                       capture="user" 
+                                       class="hidden">
+                            </label>
+                        </div>
+                        
+                        <!-- Preview -->
+                        <div id="image-preview" class="hidden mt-4">
+                            <img id="preview-image" 
+                                 src="" 
+                                 alt="Photo preview" 
+                                 class="w-full max-w-sm mx-auto rounded-lg border border-gray-300">
+                            <p class="text-xs text-green-600 mt-2">✅ Image selected successfully</p>
+                        </div>
+                    </div>
+                    <p class="mt-2 text-xs text-gray-500">Optional: You can take a photo for verification purposes.</p>
+                </div>
+
+                <!-- Notes -->
                 <div>
                     <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">
                         Notes (Optional)
                     </label>
-                    <textarea name="notes"
-                              id="notes"
+                    <textarea name="notes" 
+                              id="notes" 
                               rows="3"
                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               placeholder="Any additional notes...">{{ old('notes') }}</textarea>
                 </div>
 
+                <!-- Submit Button -->
                 <button type="submit"
                         class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -126,66 +179,48 @@
                 </div>
             </div>
         </div>
-
-        <!-- Footer -->
-        <div class="mt-8 text-center">
-            <p class="text-xs text-gray-500">
-                Attendance tracking system powered by QR codes
-            </p>
-        </div>
     </div>
 </div>
 
 <script>
-// Update current time every second
+document.addEventListener('DOMContentLoaded', function() {
+    // Update time every second
+    updateTime();
+    setInterval(updateTime, 1000);
+    
+    // Focus on first input
+    document.getElementById('employee_name').focus();
+    
+    // Image preview functionality
+    const fileInput = document.getElementById('selfie_image');
+    const preview = document.getElementById('image-preview');
+    const previewImage = document.getElementById('preview-image');
+    
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                preview.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        } else {
+            preview.classList.add('hidden');
+        }
+    });
+});
+
 function updateTime() {
     const now = new Date();
     const timeString = now.toLocaleTimeString('en-US', {
-        hour12: false,
+        hour12: true,
         hour: '2-digit',
         minute: '2-digit',
-        second: '2-digit'
+        second: '2-digit',
+        timeZone: 'Asia/Manila'
     });
     document.getElementById('current-time').textContent = timeString;
 }
-
-// Update time immediately and then every second
-updateTime();
-setInterval(updateTime, 1000);
-
-// Auto-focus on first input
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('employee_name').focus();
-});
-
-// Form validation
-document.querySelector('form').addEventListener('submit', function(e) {
-    const employeeName = document.getElementById('employee_name').value.trim();
-    const employeeId = document.getElementById('employee_id').value.trim();
-
-    if (!employeeName || !employeeId) {
-        e.preventDefault();
-        alert('Please fill in all required fields');
-        return;
-    }
-
-    // Show loading state
-    const submitBtn = this.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = `
-        <svg class="animate-spin w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        Processing...
-    `;
-    submitBtn.disabled = true;
-
-    // Re-enable button after 5 seconds (fallback)
-    setTimeout(() => {
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-    }, 5000);
-});
 </script>
 @endsection

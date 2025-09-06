@@ -6,7 +6,7 @@
 @endpush
 @section('content')
 
-<div class="container mx-auto px-4 py-8">
+<div class="max-w-full container mx-auto px-4 py-8">
     <!-- Header -->
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900 mb-2">Meeting Publications</h1>
@@ -91,12 +91,12 @@
                                     Approved
                                 </span>
                                 <div class="flex space-x-2">
-                                    <button onclick="printMeeting({{ $meeting['id'] }})" 
+                                    {{-- <button onclick="printMeeting({{ $meeting['id'] }})" 
                                             class="flex items-center px-3 py-1 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors"
                                             title="Print Meeting">
                                         <i class="fas fa-print mr-1"></i>
                                         Print
-                                    </button>
+                                    </button> --}}
                                     
                                     @if($meeting['is_published'])
                                         <button onclick="unpublishMeeting({{ $meeting['id'] }})" 
@@ -126,7 +126,7 @@
                     </div>
                     <h3 class="text-lg font-medium text-gray-900 mb-2">No approved meetings</h3>
                     <p class="text-gray-500 mb-4">There are no approved meetings ready for publishing yet.</p>
-                    <a href="{{ route('meetings.manage') }}" 
+                    <a href="" 
                        class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                         <i class="fas fa-plus mr-2"></i>
                         Manage Meetings
